@@ -162,24 +162,12 @@ final class GameRenderer {
         c.drawText("NEON KEYPAD RUNNER", w * 0.5f, h * 0.195f, p);
         c.drawText(e.currentWorld() + "  •  " + e.dailyEventName(), w * 0.5f, h * 0.22f, p);
 
-        drawStat(w * 0.17f, h * 0.27f, "COINS", String.valueOf(e.save.coins), 0xffFFE36E);
-        drawStat(w * 0.50f, h * 0.27f, "BEST", String.valueOf(e.save.bestScore), 0xff79D8FF);
-        drawStat(w * 0.83f, h * 0.27f, "MULTI", e.save.multiplier + "x", 0xffff7cc8);
+        drawStatValue(c, w * 0.17f, h * 0.27f, "COINS", String.valueOf(e.save.coins), 0xffFFE36E);
+        drawStatValue(c, w * 0.50f, h * 0.27f, "BEST", String.valueOf(e.save.bestScore), 0xff79D8FF);
+        drawStatValue(c, w * 0.83f, h * 0.27f, "MULTI", e.save.multiplier + "x", 0xffff7cc8);
 
         drawMenu(c, e, e.menuLabels(), h * 0.315f, 0.072f);
         drawHint(c, "↑↓ SELECT  5 OK  0 BACK  2/4/6/8 SHORTCUTS");
-    }
-
-    private void drawStat(float x, float y, String label, String value, int color) {
-        p.setTextAlign(Paint.Align.CENTER);
-        p.setTypeface(Typeface.create("sans", Typeface.BOLD));
-        p.setTextSize(7.5f * sx);
-        p.setColor(0x7FBED0E0);
-        cDummy();
-    }
-
-    private void cDummy() {
-        // Keeps drawStat's text layout isolated from larger panels.
     }
 
     private void drawMenu(Canvas c, GameEngine e, String[] items, float top, float rowFactor) {
