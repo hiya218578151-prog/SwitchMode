@@ -54,6 +54,7 @@ final class GameEngine {
     float x2Timer;
     float headstartTimer;
     float attackTimer;
+    float scoreBoosterTimer;
     int runRevives;
 
     float noticeTimer;
@@ -134,11 +135,13 @@ final class GameEngine {
         boardTimer = Math.max(0f, boardTimer - dt);
         powerTimer = Math.max(0f, powerTimer - dt);
         x2Timer = Math.max(0f, x2Timer - dt);
+        scoreBoosterTimer = Math.max(0f, scoreBoosterTimer - dt);
 
         if (boardActive && boardTimer <= 0f) boardActive = false;
         if (powerTimer <= 0f) activePower = PowerType.NONE;
 
         float multiplier = save.multiplier * (x2Timer > 0f ? 2f : 1f);
+        if (scoreBoosterTimer > 0f) multiplier += 5f;
         float challengeBonus = challengeMode == MODE_HURDLES ? 1.35f
                 : challengeMode == MODE_SHOWDOWN ? 1.2f
                 : challengeMode == MODE_MARATHON ? 1.15f
@@ -445,6 +448,7 @@ final class GameEngine {
         powerTimer = x2Timer = 0f;
         headstartTimer = 0f;
         attackTimer = mode == MODE_ATTACK ? 24f : 0f;
+        scoreBoosterTimer = 0f;
         runRevives = 0;
         totalJumps = totalRolls = totalPowerUps = totalDodges = 0;
         playerLane = 1;
@@ -453,13 +457,13 @@ final class GameEngine {
         challengeMode = mode;
 
         save.totalRuns++;
-        if (mode == MODE_MARATHON && save.headstarts > 0) {
+        if (save.headstarts > 0 && mode != MODE_HURDLES) {
             save.headstarts--;
             headstartTimer = 2.5f;
         }
         if (save.scoreBoosters > 0 && mode != MODE_HURDLES) {
             save.scoreBoosters--;
-            save.multiplier = Math.min(30, save.multiplier + 2);
+            scoreBoosterTimer = 10f;
             save.save();
         }
         notice(mode == MODE_NORMAL ? "RUN START" : challengeTitle(mode), 1.0f);
@@ -823,7 +827,7 @@ final class GameEngine {
                 return new String[]{
                         "START RUN", "DAILY GIFT", "SHOP", "MISSIONS", "SEASON HUNT",
                         "EVENTS", "WORD HUNT", "CHALLENGES", "MYSTERY BOX",
-                        "COLLECTIONS", "CHARACTERS", "OUTFITS", "BOARDS",
+                        "BOOSTS", "COLLECTIONS", "CHARACTERS", "OUTFITS", "BOARDS",
                         "WORLD TOUR", "PROFILE / TOP RUN", "FRIENDS", "NEWS", "SETTINGS"
                 };
             case SHOP:
@@ -838,6 +842,8 @@ final class GameEngine {
                 return new String[]{"BASE", "NOVA NIGHT  •  650", "KAI STORM  •  850"};
             case BOARDS:
                 return new String[]{"PULSE  •  FREE", "VOLT  •  700", "SOLAR  •  1200"};
+            case BOOSTS:
+                return new String[]{"Score Booster", "Headstart", "Board Stock"};
             case MYSTERY_BOX:
                 return new String[]{"MINI BOX  •  DAILY", "MYSTERY BOX  •  350", "SUPER BOX"};
             case SETTINGS:
@@ -853,7 +859,7 @@ final class GameEngine {
             case PAUSED:
                 return new String[]{"RESUME", "RESTART", "HOME"};
             case GAME_OVER:
-                return new String[]{"RUN AGAIN", "HOME"};
+                return new String[]{"REVIVE  •  KEY", "RUN AGAIN", "HOME"};
             default:
                 return new String[]{"BACK"};
         }
@@ -982,15 +988,16 @@ final class GameEngine {
             case 6: state = ScreenState.WORD_HUNT; focus = 0; break;
             case 7: state = ScreenState.CHALLENGES; focus = 0; break;
             case 8: state = ScreenState.MYSTERY_BOX; focus = 0; break;
-            case 9: state = ScreenState.COLLECTIONS; focus = 0; break;
-            case 10: state = ScreenState.CHARACTERS; focus = save.selectedCharacter; break;
-            case 11: state = ScreenState.OUTFITS; focus = save.selectedOutfit; break;
-            case 12: state = ScreenState.BOARDS; focus = save.selectedBoard; break;
-            case 13: state = ScreenState.WORLD_TOUR; focus = 0; break;
-            case 14: state = ScreenState.PROFILE; focus = 0; break;
-            case 15: state = ScreenState.FRIENDS; focus = 0; break;
-            case 16: state = ScreenState.NEWS; focus = 0; break;
-            case 17: state = ScreenState.SETTINGS; focus = 0; break;
+            case 9: state = ScreenState.BOOSTS; focus = 0; break;
+            case 10: state = ScreenState.COLLECTIONS; focus = 0; break;
+            case 11: state = ScreenState.CHARACTERS; focus = save.selectedCharacter; break;
+            case 12: state = ScreenState.OUTFITS; focus = save.selectedOutfit; break;
+            case 13: state = ScreenState.BOARDS; focus = save.selectedBoard; break;
+            case 14: state = ScreenState.WORLD_TOUR; focus = 0; break;
+            case 15: state = ScreenState.PROFILE; focus = 0; break;
+            case 16: state = ScreenState.FRIENDS; focus = 0; break;
+            case 17: state = ScreenState.NEWS; focus = 0; break;
+            case 18: state = ScreenState.SETTINGS; focus = 0; break;
             default: break;
         }
     }
