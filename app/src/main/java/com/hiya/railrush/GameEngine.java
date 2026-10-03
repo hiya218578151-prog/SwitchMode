@@ -837,6 +837,12 @@ final class GameEngine {
             case SHOP:
                 return new String[]{"Magnet Upgrade • LV " + save.magnetLevel, "Sneakers Upgrade • LV " + save.sneakersLevel, "Score x2 Upgrade • LV " + save.x2Level,
                         "Jetpack Upgrade", "Board Pack +2", "Pogo Upgrade", "Board Power"};
+            case MISSIONS:
+                return new String[]{
+                        missions.size() > 0 ? missions.get(0).title : "Mission 1",
+                        missions.size() > 1 ? missions.get(1).title : "Mission 2",
+                        missions.size() > 2 ? missions.get(2).title : "Mission 3",
+                        "BACK"};
             case CHALLENGES:
                 return new String[]{"Mystery Hurdles • " + mysteryDifficulty + "/4", "Season Challenge", "Marathon",
                         "Tag Time Attack", "No Floor", "Lava is Floor", "Showdown", "Low Gravity"};
@@ -863,7 +869,7 @@ final class GameEngine {
             case PAUSED:
                 return new String[]{"RESUME", "RESTART", "HOME"};
             case GAME_OVER:
-                return new String[]{"REVIVE  •  KEY", "RUN AGAIN", "HOME"};
+                return new String[]{"REVIVE • " + (1 << Math.min(4, runRevives)) + " KEY", "RUN AGAIN", "HOME"};
             default:
                 return new String[]{"BACK"};
         }
@@ -1348,6 +1354,11 @@ final class GameEngine {
             if (state == ScreenState.RUNNING) moveLane(1); else moveFocus(1);
             return true;
         }
+        if (state == ScreenState.CHALLENGES && keyCode == KeyEvent.KEYCODE_1) { mysteryDifficulty = 1; focus = 0; return true; }
+        if (state == ScreenState.CHALLENGES && keyCode == KeyEvent.KEYCODE_2) { mysteryDifficulty = 2; focus = 0; return true; }
+        if (state == ScreenState.CHALLENGES && keyCode == KeyEvent.KEYCODE_3) { mysteryDifficulty = 3; focus = 0; return true; }
+        if (state == ScreenState.CHALLENGES && keyCode == KeyEvent.KEYCODE_4) { mysteryDifficulty = 4; focus = 0; return true; }
+
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_2) {
             if (state == ScreenState.RUNNING) jump(); else moveFocus(-1);
             return true;
