@@ -197,7 +197,6 @@ final class GameEngine {
         int distanceTick = (int)Math.max(1, speed * 82f * dt);
         addMissionMetric("distance", distanceTick);
         save.totalDistance += distanceTick;
-        save.save();
     }
 
     private void spawnChunk() {
@@ -465,6 +464,7 @@ final class GameEngine {
         refreshLeagueFromScore();
         save.addCoins(runCoins);
         save.keys += runKeys;
+        saveMissionProgress();
         save.save();
 
         state = ScreenState.GAME_OVER;
@@ -546,7 +546,6 @@ final class GameEngine {
         }
 
         if (!changed) return;
-        saveMissionProgress();
 
         boolean all = true;
         for (Mission m : missions) all &= m.done();
@@ -556,13 +555,12 @@ final class GameEngine {
             save.multiplier = Math.min(30, save.multiplier + 1);
             save.coins += 100;
             save.superBoxes += 1;
+            saveMissionProgress();
             save.save();
             buildMissions();
             saveMissionProgress();
             notice("MULTIPLIER " + save.multiplier + "x!", 1.35f);
             beep(90);
-        } else {
-            save.save();
         }
     }
 
@@ -899,13 +897,15 @@ final class GameEngine {
                 else goBack();
                 break;
             case WORD_HUNT:
-                if (wordComplete()) {
+                if (wordComplete() && save.wordClaimedDay != dayIndex()) {
                     save.coins += 250;
                     save.superBoxes++;
                     save.wordStreak++;
+                    save.wordClaimedDay = dayIndex();
                     save.save();
                     notice("WORD COMPLETE!", 1.2f);
-                    resetWordForNextDay();
+                } else if (save.wordClaimedDay == dayIndex()) {
+                    notice("CLAIMED TODAY", 1.0f);
                 } else {
                     notice(wordStatus(), 1.0f);
                 }
@@ -1029,12 +1029,6 @@ final class GameEngine {
         }
     }
 
-    private void resetWordForNextDay() {
-        save.wordDay = dayIndex() + 1;
-        save.wordProgress = "";
-        save.save();
-    }
-
     private void collectWordLetter(String letter) {
         String word = todayWord();
         int index = save.wordProgress.length();
@@ -1052,7 +1046,7 @@ final class GameEngine {
     }
 
     boolean wordComplete() {
-        return save.wordProgress.equals(todayWord());
+        return save.wordProgress.equals(todayWord()) && save.wordClaimedDay != dayIndex();
     }
 
     String wordStatus() {
@@ -1215,6 +1209,10 @@ final class GameEngine {
     }
 
     void goBack() {
+        if (state != ScreenState.RUNNING) {
+            saveMissionProgress();
+            save.save();
+        }
         switch (state) {
             case RUNNING:
                 state = ScreenState.PAUSED;
