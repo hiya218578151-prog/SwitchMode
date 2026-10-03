@@ -29,6 +29,7 @@ final class SaveManager {
     int wordStreak = 0;
     String wordProgress = "";
     long wordDay = -1L;
+    long wordClaimedDay = -1L;
     long seasonStart = 0L;
     int seasonClaimedTier = 0;
 
@@ -93,6 +94,7 @@ final class SaveManager {
         wordStreak = prefs.getInt("wordStreak", 0);
         wordProgress = prefs.getString("wordProgress", "");
         wordDay = prefs.getLong("wordDay", -1L);
+        wordClaimedDay = prefs.getLong("wordClaimedDay", -1L);
         seasonStart = prefs.getLong("seasonStart", 0L);
         seasonClaimedTier = prefs.getInt("seasonClaimedTier", 0);
         lastDailyClaimDay = prefs.getLong("lastDailyClaimDay", -1L);
@@ -154,6 +156,7 @@ final class SaveManager {
             .putInt("wordStreak", wordStreak)
             .putString("wordProgress", wordProgress)
             .putLong("wordDay", wordDay)
+            .putLong("wordClaimedDay", wordClaimedDay)
             .putLong("seasonStart", seasonStart)
             .putInt("seasonClaimedTier", seasonClaimedTier)
             .putLong("lastDailyClaimDay", lastDailyClaimDay)
