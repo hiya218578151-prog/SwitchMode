@@ -33,6 +33,8 @@ final class SaveManager {
     int seasonClaimedTier = 0;
 
     long lastDailyClaimDay = -1L;
+    long lastMysteryClaimDay = -1L;
+    long lastWeeklyClaim = -1L;
     int loginStreak = 0;
     int mysteryBoxesOpened = 0;
     int superBoxes = 1;
@@ -94,6 +96,8 @@ final class SaveManager {
         seasonStart = prefs.getLong("seasonStart", 0L);
         seasonClaimedTier = prefs.getInt("seasonClaimedTier", 0);
         lastDailyClaimDay = prefs.getLong("lastDailyClaimDay", -1L);
+        lastMysteryClaimDay = prefs.getLong("lastMysteryClaimDay", -1L);
+        lastWeeklyClaim = prefs.getLong("lastWeeklyClaim", -1L);
         loginStreak = prefs.getInt("loginStreak", 0);
         mysteryBoxesOpened = prefs.getInt("mysteryBoxesOpened", 0);
         superBoxes = prefs.getInt("superBoxes", 1);
@@ -122,7 +126,7 @@ final class SaveManager {
         totalRolls = prefs.getLong("totalRolls", 0L);
 
         if (seasonStart == 0L) {
-            seasonStart = dayStart(System.currentTimeMillis());
+            seasonStart = System.currentTimeMillis();
             save();
         }
     }
@@ -153,6 +157,8 @@ final class SaveManager {
             .putLong("seasonStart", seasonStart)
             .putInt("seasonClaimedTier", seasonClaimedTier)
             .putLong("lastDailyClaimDay", lastDailyClaimDay)
+            .putLong("lastMysteryClaimDay", lastMysteryClaimDay)
+            .putLong("lastWeeklyClaim", lastWeeklyClaim)
             .putInt("loginStreak", loginStreak)
             .putInt("mysteryBoxesOpened", mysteryBoxesOpened)
             .putInt("superBoxes", superBoxes)
