@@ -2,7 +2,7 @@
 
 **Rail Rush** is an original Android keypad-first endless runner built from scratch from the supplied 17-page research specification.
 
-The reference document describes a three-lane runner with lane switching, jumping, rolling, trains/obstacles, coins, powers, boards, missions, achievements, Word Hunt, Season Hunt, Daily Events, Mystery Boxes, Challenges, Collections, World Tour, Profile/Friends, Shop and progression systems. fileciteturn0file0L13-L18
+The reference document describes a three-lane runner with lane switching, jumping, rolling, trains/obstacles, coins, powers, boards, missions, achievements, Word Hunt, Season Hunt, Daily Events, Mystery Boxes, Challenges, Collections, World Tour, Profile/Friends, Shop and progression systems.
 
 ## What is implemented
 
