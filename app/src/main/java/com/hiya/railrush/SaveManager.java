@@ -13,6 +13,8 @@ final class SaveManager {
     int multiplier = 1;
     int missionsCompleted = 0;
     int boards = 3;
+    int scoreBoosters = 2;
+    int headstarts = 1;
     int selectedCharacter = 0;
     int selectedOutfit = 0;
     int selectedBoard = 0;
@@ -36,6 +38,7 @@ final class SaveManager {
     long lastDailyClaimDay = -1L;
     long lastMysteryClaimDay = -1L;
     long lastWeeklyClaim = -1L;
+    long weekStartDay = -1L;
     int loginStreak = 0;
     int mysteryBoxesOpened = 0;
     int superBoxes = 1;
@@ -79,6 +82,8 @@ final class SaveManager {
         multiplier = prefs.getInt("multiplier", 1);
         missionsCompleted = prefs.getInt("missionsCompleted", 0);
         boards = prefs.getInt("boards", 3);
+        scoreBoosters = prefs.getInt("scoreBoosters", 2);
+        headstarts = prefs.getInt("headstarts", 1);
         selectedCharacter = prefs.getInt("selectedCharacter", 0);
         selectedOutfit = prefs.getInt("selectedOutfit", 0);
         selectedBoard = prefs.getInt("selectedBoard", 0);
@@ -100,6 +105,7 @@ final class SaveManager {
         lastDailyClaimDay = prefs.getLong("lastDailyClaimDay", -1L);
         lastMysteryClaimDay = prefs.getLong("lastMysteryClaimDay", -1L);
         lastWeeklyClaim = prefs.getLong("lastWeeklyClaim", -1L);
+        weekStartDay = prefs.getLong("weekStartDay", -1L);
         loginStreak = prefs.getInt("loginStreak", 0);
         mysteryBoxesOpened = prefs.getInt("mysteryBoxesOpened", 0);
         superBoxes = prefs.getInt("superBoxes", 1);
@@ -141,6 +147,8 @@ final class SaveManager {
             .putInt("multiplier", multiplier)
             .putInt("missionsCompleted", missionsCompleted)
             .putInt("boards", boards)
+            .putInt("scoreBoosters", scoreBoosters)
+            .putInt("headstarts", headstarts)
             .putInt("selectedCharacter", selectedCharacter)
             .putInt("selectedOutfit", selectedOutfit)
             .putInt("selectedBoard", selectedBoard)
@@ -162,6 +170,7 @@ final class SaveManager {
             .putLong("lastDailyClaimDay", lastDailyClaimDay)
             .putLong("lastMysteryClaimDay", lastMysteryClaimDay)
             .putLong("lastWeeklyClaim", lastWeeklyClaim)
+            .putLong("weekStartDay", weekStartDay)
             .putInt("loginStreak", loginStreak)
             .putInt("mysteryBoxesOpened", mysteryBoxesOpened)
             .putInt("superBoxes", superBoxes)
