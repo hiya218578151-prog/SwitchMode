@@ -53,6 +53,8 @@ final class GameEngine {
     float powerTimer;
     float x2Timer;
     float headstartTimer;
+    float attackTimer;
+    int runRevives;
 
     float noticeTimer;
     String notice = "";
@@ -94,6 +96,7 @@ final class GameEngine {
         restoreMissionProgress();
         worldIndex = currentWorldIndex();
         ensureDailyData();
+        ensureWeeklyData();
         refreshWeekLeague();
     }
 
@@ -115,6 +118,10 @@ final class GameEngine {
 
     private void updateRun(float dt) {
         speed = Math.min(0.82f, speed + dt * (challengeMode == MODE_ATTACK ? 0.012f : 0.008f));
+        if (challengeMode == MODE_ATTACK) {
+            attackTimer -= dt;
+            if (attackTimer <= 0f) { gameOver(); return; }
+        }
         distance += speed * 82f * dt;
 
         if (headstartTimer > 0f) {
@@ -145,8 +152,8 @@ final class GameEngine {
         if (spawnTimer <= 0f) {
             spawnChunk();
             float cadence = challengeMode == MODE_ATTACK ? 0.56f : 0.84f;
-            if (challengeMode == MODE_HURDLES) cadence = 0.62f;
-            spawnTimer = Math.max(0.31f, cadence - speed * 0.38f);
+            if (challengeMode == MODE_HURDLES) cadence = Math.max(0.42f, 0.70f - mysteryDifficulty * 0.07f);
+            spawnTimer = Math.max(0.31f - mysteryDifficulty * 0.02f, cadence - speed * 0.38f);
         }
 
         for (GameObject object : objects) {
@@ -366,6 +373,10 @@ final class GameEngine {
                 jumpTimer = powerTimer;
                 notice("POGO AIR", 0.85f);
                 break;
+            case HOURGLASS:
+                attackTimer += 4.0f;
+                notice("HOURGLASS +4s", 0.8f);
+                break;
             case MYSTERIZER:
                 powerTimer = 5.5f;
                 int roll = random.nextInt(4);
@@ -433,6 +444,8 @@ final class GameEngine {
         activePower = PowerType.NONE;
         powerTimer = x2Timer = 0f;
         headstartTimer = 0f;
+        attackTimer = mode == MODE_ATTACK ? 24f : 0f;
+        runRevives = 0;
         totalJumps = totalRolls = totalPowerUps = totalDodges = 0;
         playerLane = 1;
         laneVisual = 1f;
@@ -440,7 +453,15 @@ final class GameEngine {
         challengeMode = mode;
 
         save.totalRuns++;
-        if (mode == MODE_MARATHON) headstartTimer = 2.5f;
+        if (mode == MODE_MARATHON && save.headstarts > 0) {
+            save.headstarts--;
+            headstartTimer = 2.5f;
+        }
+        if (save.scoreBoosters > 0 && mode != MODE_HURDLES) {
+            save.scoreBoosters--;
+            save.multiplier = Math.min(30, save.multiplier + 2);
+            save.save();
+        }
         notice(mode == MODE_NORMAL ? "RUN START" : challengeTitle(mode), 1.0f);
         beep(70);
     }
@@ -809,7 +830,7 @@ final class GameEngine {
                 return new String[]{"Magnet Upgrade", "Sneakers Upgrade", "Score x2 Upgrade",
                         "Jetpack Upgrade", "Board Pack +2", "Pogo Upgrade", "Board Power"};
             case CHALLENGES:
-                return new String[]{"Mystery Hurdles", "Season Challenge", "Marathon",
+                return new String[]{"Mystery Hurdles • " + mysteryDifficulty + "/4", "Season Challenge", "Marathon",
                         "Tag Time Attack", "No Floor", "Lava is Floor", "Showdown", "Low Gravity"};
             case CHARACTERS:
                 return new String[]{"NOVA  •  FREE", "KAI  •  500 COINS", "ZIA  •  60 TOKENS"};
@@ -863,11 +884,15 @@ final class GameEngine {
                 else { state = ScreenState.HOME; focus = 0; }
                 break;
             case GAME_OVER:
-                if (focus == 0) startRun(challengeMode);
+                if (focus == 0) reviveRun();
+                else if (focus == 1) startRun(challengeMode);
                 else { state = ScreenState.HOME; focus = 0; }
                 break;
             case SHOP:
                 buyShopItem(focus);
+                break;
+            case BOOSTS:
+                buyBoost(focus);
                 break;
             case CHARACTERS:
                 selectCharacter(focus);
@@ -911,7 +936,7 @@ final class GameEngine {
                 }
                 break;
             case MISSIONS:
-                state = ScreenState.HOME; focus = 0;
+                if (focus < 3) skipMission(focus); else { state = ScreenState.HOME; focus = 0; }
                 break;
             case ACHIEVEMENTS:
                 state = ScreenState.HOME; focus = 0;
@@ -995,6 +1020,41 @@ final class GameEngine {
         if (save.board2Unlocked) points += 3;
         if (save.board3Unlocked) points += 3;
         return points;
+    }
+
+    private void skipMission(int index) {
+        if (index < 0 || index >= missions.size() || missions.get(index).done()) { notice("MISSION DONE", .8f); return; }
+        if (!save.spendCoins(200)) { notice("200 COINS", 1.0f); return; }
+        missions.get(index).progress = missions.get(index).target;
+        missions.get(index).rewarded = true;
+        saveMissionProgress();
+        save.save();
+        notice("MISSION SKIPPED", 1.0f);
+    }
+
+    private void buyBoost(int which) {
+        if (which == 0) {
+            if (save.spendCoins(260)) { save.scoreBoosters++; save.save(); notice("SCORE BOOST +1", 1.0f); }
+            else notice("260 COINS", 1.0f);
+        } else if (which == 1) {
+            if (save.spendCoins(220)) { save.headstarts++; save.save(); notice("HEADSTART +1", 1.0f); }
+            else notice("220 COINS", 1.0f);
+        } else {
+            if (save.spendCoins(300)) { save.boards += 2; save.save(); notice("BOARD STOCK +2", 1.0f); }
+            else notice("300 COINS", 1.0f);
+        }
+    }
+
+    private void reviveRun() {
+        int cost = 1 << Math.min(4, runRevives);
+        if (!save.spendKeys(cost)) { notice("NEED " + cost + " KEYS", 1.0f); return; }
+        runRevives++;
+        for (GameObject o : objects) if (o.kind == GameObject.Kind.OBSTACLE && o.z < 0.30f) o.active = false;
+        boardActive = true;
+        boardTimer = 5.5f;
+        state = ScreenState.RUNNING;
+        notice("REVIVED • KEYS -" + cost, 1.1f);
+        vibrate(45);
     }
 
     private void claimWeeklyBonus() {
@@ -1175,6 +1235,16 @@ final class GameEngine {
         }
     }
 
+    private void ensureWeeklyData() {
+        long week = dayIndex() / 7L;
+        if (save.weekStartDay != week) {
+            save.weekStartDay = week;
+            save.weekBest = 0;
+            save.lastWeeklyClaim = -1L;
+            save.save();
+        }
+    }
+
     private void refreshWeekLeague() {
         int rank = Math.max(1, save.weekBest / 1200);
         save.league = Math.max(1, Math.min(8, 1 + rank));
@@ -1281,6 +1351,12 @@ final class GameEngine {
             if (keyCode == KeyEvent.KEYCODE_3) { state = ScreenState.SHOP; focus = 0; return true; }
             if (keyCode == KeyEvent.KEYCODE_7) { state = ScreenState.BOARDS; focus = save.selectedBoard; return true; }
             if (keyCode == KeyEvent.KEYCODE_9) { state = ScreenState.SETTINGS; focus = 0; return true; }
+            if (state == ScreenState.CHALLENGES) {
+                if (keyCode == KeyEvent.KEYCODE_1) { mysteryDifficulty = 1; focus = 0; return true; }
+                if (keyCode == KeyEvent.KEYCODE_2) { mysteryDifficulty = 2; focus = 0; return true; }
+                if (keyCode == KeyEvent.KEYCODE_3) { mysteryDifficulty = 3; focus = 0; return true; }
+                if (keyCode == KeyEvent.KEYCODE_4) { mysteryDifficulty = 4; focus = 0; return true; }
+            }
         } else if (keyCode == KeyEvent.KEYCODE_7) {
             activateBoard();
             return true;
