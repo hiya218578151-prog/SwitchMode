@@ -291,7 +291,7 @@ final class GameRenderer {
         for (int i = 0; i < e.missions.size(); i++) {
             Mission m = e.missions.get(i);
             float y = h * 0.21f + i * h * 0.19f;
-            p.setColor(m.done() ? 0xA72C5C53 : 0x8A202E45);
+            p.setColor(i == e.focus ? 0xB02D4969 : (m.done() ? 0xA72C5C53 : 0x8A202E45));
             r.set(w * 0.07f, y, w * 0.93f, y + h * 0.15f);
             c.drawRoundRect(r, 16 * sx, 16 * sy, p);
 
@@ -320,7 +320,7 @@ final class GameRenderer {
         p.setTextSize(8.8f * sx);
         p.setColor(0x98DDEAF3);
         c.drawText("3 MISSIONS → MULTIPLIER +1 → MAX 30X → SUPER BOXES", w * 0.5f, h * 0.84f, p);
-        drawHint(c, "5 / 0  •  OK / BACK");
+        drawHint(c, "↑↓ SELECT MISSION  5 SKIP • 200 COINS  0 BACK");
     }
 
     private void drawAchievements(Canvas c, GameEngine e) {
@@ -483,8 +483,8 @@ final class GameRenderer {
         p.setTextAlign(Paint.Align.CENTER);
         p.setTypeface(Typeface.create("sans", Typeface.BOLD));
         p.setTextSize(26 * sx);
-        p.setColor(0xff6BFFB2);
-        c.drawText("COLLECTION POINTS " + points, w * 0.5f, h * 0.27f, p);
+        p.setColor(e.save.multiplier >= 7 ? 0xff6BFFB2 : 0xff92A5B6);
+        c.drawText(e.save.multiplier >= 7 ? "COLLECTION POINTS " + points : "COLLECTIONS • UNLOCK AT 7X", w * 0.5f, h * 0.27f, p);
 
         String[] rows = {
                 "CHARACTERS     " + unlockedCharacters(e),
@@ -1024,6 +1024,18 @@ final class GameRenderer {
         p.setColor(0x6CCFDFED);
         c.drawText("4/← LANE   2/↑ JUMP   8/↓ ROLL   7 BOARD   0 PAUSE",
                 w * .5f, h * .986f, p);
+        if (e.challengeMode == GameEngine.MODE_ATTACK) {
+            p.setTypeface(Typeface.create("sans", Typeface.BOLD));
+            p.setTextSize(10 * sx);
+            p.setColor(0xffffd56e);
+            c.drawText("TIME " + Math.ceil(e.attackTimer) + "s", w * .5f, 78 * sy, p);
+        }
+        if (e.scoreBoosterTimer > 0f) {
+            p.setTypeface(Typeface.DEFAULT);
+            p.setTextSize(7.5f * sx);
+            p.setColor(0xff6BFFB2);
+            c.drawText("BOOST +5  " + Math.ceil(e.scoreBoosterTimer) + "s", w * .5f, 91 * sy, p);
+        }
     }
 
     private void drawChallengeRibbon(Canvas c, GameEngine e) {
