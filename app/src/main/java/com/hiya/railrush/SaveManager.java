@@ -90,4 +90,27 @@ final class SaveManager {
         save();
         return true;
     }
+
+    int[] loadMissionProgress() {
+        int[] result = new int[3];
+        String raw = prefs.getString("missionProgress", "0,0,0");
+        String[] parts = raw.split(",");
+        for (int i = 0; i < result.length && i < parts.length; i++) {
+            try {
+                result[i] = Math.max(0, Integer.parseInt(parts[i]));
+            } catch (NumberFormatException ignored) {
+                result[i] = 0;
+            }
+        }
+        return result;
+    }
+
+    void saveMissionProgress(java.util.List<Mission> missions) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            if (i > 0) b.append(',');
+            b.append(i < missions.size() ? missions.get(i).progress : 0);
+        }
+        prefs.edit().putString("missionProgress", b.toString()).apply();
+    }
 }
