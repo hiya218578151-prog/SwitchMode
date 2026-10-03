@@ -213,7 +213,7 @@ final class GameEngine {
             obstacle = roll < 28 ? ObstacleType.LOW_BARRIER
                     : (roll < 60 ? ObstacleType.TRAIN
                     : (roll < 79 ? ObstacleType.HIGH_BARRIER
-                    : (roll < 91 ? ObstacleType.TUNNEL : ObstacleType.GRIND));
+                    : (roll < 91 ? ObstacleType.TUNNEL : ObstacleType.GRIND)));
         }
 
         objects.add(GameObject.obstacle(lane, 1.08f, obstacle));
