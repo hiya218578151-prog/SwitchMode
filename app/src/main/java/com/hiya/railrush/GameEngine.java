@@ -56,6 +56,14 @@ final class GameEngine {
         save = new SaveManager(context);
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         buildMissions();
+        restoreMissionProgress();
+    }
+
+    private void restoreMissionProgress() {
+        int[] savedProgress = save.loadMissionProgress();
+        for (int i = 0; i < missions.size() && i < savedProgress.length; i++) {
+            missions.get(i).progress = Math.min(missions.get(i).target, savedProgress[i]);
+        }
     }
 
     void update(float dt) {
@@ -334,6 +342,7 @@ final class GameEngine {
         }
         save.boards--;
         save.save();
+        addMissionMetric("boards", 1);
         boardActive = true;
         boardTimer = 8f;
         notice("BOARD READY", 1.0f);
@@ -377,10 +386,13 @@ final class GameEngine {
                     save.coins += 25;
                     save.keys += 1;
                     save.save();
+                    saveMissionProgress();
                     notice("MISSION +", 1.2f);
                 }
             }
         }
+        saveMissionProgress();
+
         boolean all = true;
         for (Mission m : missions) all &= m.done();
         if (all) {
@@ -389,8 +401,13 @@ final class GameEngine {
             save.coins += 100;
             save.save();
             buildMissions();
+            saveMissionProgress();
             notice("MULTIPLIER +" + save.multiplier + "x", 1.6f);
         }
+    }
+
+    private void saveMissionProgress() {
+        save.saveMissionProgress(missions);
     }
 
     private void spawnBurst(GameObject source, int color) {
