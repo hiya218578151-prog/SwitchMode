@@ -569,11 +569,12 @@ final class GameEngine {
     void openMysteryBox(int type) {
         if (type == 0) {
             int day = (int)dayIndex();
-            if (save.mysteryBoxesOpened / 1 == day && save.mysteryBoxesOpened > 0) {
+            if (save.lastMysteryClaimDay == day) {
                 notice("DAILY BOX USED", 1.0f);
                 return;
             }
-            save.mysteryBoxesOpened = Math.max(save.mysteryBoxesOpened + 1, day + 1);
+            save.lastMysteryClaimDay = day;
+            save.mysteryBoxesOpened++;
         } else if (type == 1) {
             if (!save.spendCoins(350)) {
                 notice("350 COINS", 1.0f);
@@ -998,11 +999,16 @@ final class GameEngine {
 
     private void claimWeeklyBonus() {
         long week = dayIndex() / 7L;
+        if (save.lastWeeklyClaim == week) {
+            notice("WEEK BONUS CLAIMED", 1.0f);
+            return;
+        }
         if (save.weekBest == 0) {
             notice("RUN FIRST FOR BONUS", 1.0f);
             return;
         }
         int reward = 100 + save.league * 35;
+        save.lastWeeklyClaim = week;
         save.coins += reward;
         save.save();
         notice("WEEK BONUS +" + reward, 1.0f);
