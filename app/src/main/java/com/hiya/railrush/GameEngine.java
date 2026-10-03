@@ -613,7 +613,7 @@ final class GameEngine {
             save.mysteryBoxesOpened++;
         }
 
-        int reward = random.nextInt(type == 2 ? 5 : 4);
+        int reward = random.nextInt(type == 2 ? 6 : 4);
         if (reward == 0) {
             int coins = type == 2 ? 1400 : 260;
             save.coins += coins;
@@ -627,6 +627,9 @@ final class GameEngine {
         } else if (reward == 3) {
             save.characterTokens += type == 2 ? 60 : 15;
             notice("CHAR TOKEN +", 1.0f);
+        } else if (reward == 4) {
+            save.coins += 100000;
+            notice("JACKPOT +100000", 1.3f);
         } else {
             save.boards += 3;
             notice("BOARDS +3", 1.0f);
