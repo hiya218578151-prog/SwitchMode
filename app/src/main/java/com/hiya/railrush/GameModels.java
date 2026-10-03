@@ -1,7 +1,5 @@
 package com.hiya.railrush;
 
-import android.graphics.PointF;
-
 enum ScreenState {
     HOME, RUNNING, PAUSED, GAME_OVER, SHOP, MISSIONS, CHARACTERS, BOARDS, ACHIEVEMENTS, SETTINGS
 }
@@ -38,6 +36,7 @@ final class Mission {
     final String metric;
     final int target;
     int progress;
+    boolean rewarded;
 
     Mission(String title, String metric, int target) {
         this.title = title;
