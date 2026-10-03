@@ -1,33 +1,59 @@
 package com.hiya.railrush;
 
 enum ScreenState {
-    HOME, RUNNING, PAUSED, GAME_OVER, SHOP, MISSIONS, CHARACTERS, BOARDS, ACHIEVEMENTS, SETTINGS
+    HOME, RUNNING, PAUSED, GAME_OVER,
+    SHOP, MISSIONS, ACHIEVEMENTS, WORD_HUNT, SEASON_HUNT, EVENTS,
+    MYSTERY_BOX, CHALLENGES, COLLECTIONS, CHARACTERS, OUTFITS, BOARDS,
+    WORLD_TOUR, PROFILE, FRIENDS, NEWS, BOOSTS, DAILY_REWARDS, SETTINGS
 }
 
 enum PowerType {
-    NONE, MAGNET, SNEAKERS, X2, JETPACK
+    NONE, MAGNET, SNEAKERS, X2, JETPACK, POGO, MYSTERIZER, HOURGLASS
 }
 
 enum ObstacleType {
-    TRAIN, LOW_BARRIER, HIGH_BARRIER
+    TRAIN, LOW_BARRIER, HIGH_BARRIER, TUNNEL, GAP, GRIND
 }
 
 final class GameObject {
-    enum Kind { OBSTACLE, COIN, POWER }
+    enum Kind { OBSTACLE, COIN, POWER, LETTER, TOKEN }
     final Kind kind;
     final ObstacleType obstacleType;
     final PowerType powerType;
+    final String payload;
     int lane;
     float z;
     float spin;
     boolean active = true;
 
-    GameObject(Kind kind, int lane, float z, ObstacleType obstacleType, PowerType powerType) {
+    GameObject(Kind kind, int lane, float z, ObstacleType obstacleType,
+               PowerType powerType, String payload) {
         this.kind = kind;
         this.lane = lane;
         this.z = z;
         this.obstacleType = obstacleType;
         this.powerType = powerType;
+        this.payload = payload;
+    }
+
+    static GameObject obstacle(int lane, float z, ObstacleType type) {
+        return new GameObject(Kind.OBSTACLE, lane, z, type, PowerType.NONE, "");
+    }
+
+    static GameObject coin(int lane, float z) {
+        return new GameObject(Kind.COIN, lane, z, null, PowerType.NONE, "");
+    }
+
+    static GameObject power(int lane, float z, PowerType type) {
+        return new GameObject(Kind.POWER, lane, z, null, type, "");
+    }
+
+    static GameObject letter(int lane, float z, String letter) {
+        return new GameObject(Kind.LETTER, lane, z, null, PowerType.NONE, letter);
+    }
+
+    static GameObject token(int lane, float z) {
+        return new GameObject(Kind.TOKEN, lane, z, null, PowerType.NONE, "");
     }
 }
 
@@ -44,12 +70,10 @@ final class Mission {
         this.target = target;
     }
 
-    boolean done() {
-        return progress >= target;
-    }
+    boolean done() { return progress >= target; }
 
     float fraction() {
-        return Math.min(1f, target == 0 ? 1f : progress / (float) target);
+        return Math.min(1f, target <= 0 ? 1f : progress / (float) target);
     }
 }
 
