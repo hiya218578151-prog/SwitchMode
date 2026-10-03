@@ -97,6 +97,7 @@ final class GameEngine {
         restoreMissionProgress();
         worldIndex = currentWorldIndex();
         ensureDailyData();
+        ensureSeasonData();
         ensureWeeklyData();
         refreshWeekLeague();
     }
@@ -834,7 +835,7 @@ final class GameEngine {
                         "WORLD TOUR", "PROFILE / TOP RUN", "FRIENDS", "NEWS", "SETTINGS"
                 };
             case SHOP:
-                return new String[]{"Magnet Upgrade", "Sneakers Upgrade", "Score x2 Upgrade",
+                return new String[]{"Magnet Upgrade • LV " + save.magnetLevel, "Sneakers Upgrade • LV " + save.sneakersLevel, "Score x2 Upgrade • LV " + save.x2Level,
                         "Jetpack Upgrade", "Board Pack +2", "Pogo Upgrade", "Board Power"};
             case CHALLENGES:
                 return new String[]{"Mystery Hurdles • " + mysteryDifficulty + "/4", "Season Challenge", "Marathon",
@@ -846,7 +847,7 @@ final class GameEngine {
             case BOARDS:
                 return new String[]{"PULSE  •  FREE", "VOLT  •  700", "SOLAR  •  1200"};
             case BOOSTS:
-                return new String[]{"Score Booster", "Headstart", "Board Stock"};
+                return new String[]{"Score Booster • " + save.scoreBoosters, "Headstart • " + save.headstarts, "Board Stock • " + save.boards};
             case MYSTERY_BOX:
                 return new String[]{"MINI BOX  •  DAILY", "MYSTERY BOX  •  350", "SUPER BOX"};
             case SETTINGS:
@@ -1020,6 +1021,7 @@ final class GameEngine {
     }
 
     private int collectionPoints() {
+        if (save.multiplier < 7) return 0;
         int points = 0;
         points += 3; // base character
         if (save.character2Unlocked) points += 3;
@@ -1087,6 +1089,16 @@ final class GameEngine {
     private void openFeaturedCollab() {
         String[] collabs = {"GUEST UNIVERSE", "TIME TRAVEL", "ARENA STARS", "GALACTIC CREWMATE"};
         notice("FEATURED: " + collabs[dailyEventIndex() % collabs.length], 1.1f);
+    }
+
+    private void ensureSeasonData() {
+        long seasonDays = Math.max(0L, dayIndex() - save.dayStart(save.seasonStart));
+        if (seasonDays >= 21L) {
+            save.seasonStart = System.currentTimeMillis();
+            save.seasonTokens = 0;
+            save.seasonClaimedTier = 0;
+            save.save();
+        }
     }
 
     private void ensureDailyData() {
@@ -1361,12 +1373,6 @@ final class GameEngine {
             if (keyCode == KeyEvent.KEYCODE_3) { state = ScreenState.SHOP; focus = 0; return true; }
             if (keyCode == KeyEvent.KEYCODE_7) { state = ScreenState.BOARDS; focus = save.selectedBoard; return true; }
             if (keyCode == KeyEvent.KEYCODE_9) { state = ScreenState.SETTINGS; focus = 0; return true; }
-            if (state == ScreenState.CHALLENGES) {
-                if (keyCode == KeyEvent.KEYCODE_1) { mysteryDifficulty = 1; focus = 0; return true; }
-                if (keyCode == KeyEvent.KEYCODE_2) { mysteryDifficulty = 2; focus = 0; return true; }
-                if (keyCode == KeyEvent.KEYCODE_3) { mysteryDifficulty = 3; focus = 0; return true; }
-                if (keyCode == KeyEvent.KEYCODE_4) { mysteryDifficulty = 4; focus = 0; return true; }
-            }
         } else if (keyCode == KeyEvent.KEYCODE_7) {
             activateBoard();
             return true;
